@@ -1,0 +1,172 @@
+version: '2'
+services:
+  explorer:
+    image: yeasy/blockchain-explorer:latest
+    restart: unless-stopped
+    hostname: explorer
+    environment:
+      - HYP_REST_ENDPOINT=http://vp0:7050
+    ports:
+      - "9090:9090"
+    expose:
+      - "9090"
+  membersrvc:
+    #build:
+     # context: membersrvc
+    image: hyperledger/fabric-membersrvc:latest
+    restart: unless-stopped
+    hostname: membersrvc
+    environment:
+      - CORE_LOGGING_SERVER=debug
+    ports:
+      - "7054:7054"
+    expose:
+        - "7054"
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    command: membersrvc
+  vp0:
+    image: hyperledger/fabric-peer:latest
+    hostname: vp0
+    restart: unless-stopped
+    environment:
+      - CORE_PEER_ID=vp0
+      - CORE_SECURITY_ENROLLID=test_vp0
+      - CORE_SECURITY_ENROLLSECRET=MwYpmSRjupbT
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_NETWORKID=dev
+      - CORE_LOGGING_LEVEL=debug  #critical, error, warning, notice, info, debug
+      - CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=pbft  # noops, pbft
+      - CORE_PBFT_GENERAL_MODE=batch
+      - CORE_PBFT_GENERAL_N=4
+      - CORE_PBFT_GENERAL_BATCHSIZE=2
+      - CORE_PBFT_GENERAL_TIMEOUT_REQUEST=2s
+      - CORE_SECURITY_ENABLED=true
+      - CORE_PEER_PKI_ECA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TCA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TLSCA_PADDR=membersrvc:7054
+    ports:
+      - "7050:7050"
+      - "7051:7051"
+    expose:
+      - "7050"  # Rest
+      - "7051"  # Grpc
+      - "7052"  # Peer CLI
+      - "7053"  # Peer Event
+      - "7054"  # eCAP
+      - "7055"  # eCAA
+      - "7056"  # tCAP
+      - "7057"  # eCAA
+      - "7058"  # tlsCAP
+      - "7059"  # tlsCAA
+    links:
+      - membersrvc
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: sh -c "sleep 10; peer node start"
+  vp1:
+    image: hyperledger/fabric-peer:latest
+    hostname: vp1
+    environment:
+      - CORE_PEER_ID=vp1
+      - CORE_PEER_DISCOVERY_ROOTNODE=vp0:7051
+      - CORE_SECURITY_ENROLLID=test_vp1
+      - CORE_SECURITY_ENROLLSECRET=5wgHK9qqYaPy
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_NETWORKID=dev
+      - CORE_LOGGING_LEVEL=debug  #critical, error, warning, notice, info, debug
+      - CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=pbft  # noops, pbft
+      - CORE_PBFT_GENERAL_MODE=batch
+      - CORE_PBFT_GENERAL_N=4
+      - CORE_PBFT_GENERAL_BATCHSIZE=2
+      - CORE_PBFT_GENERAL_TIMEOUT_REQUEST=2s
+      - CORE_SECURITY_ENABLED=true
+      - CORE_PEER_PKI_ECA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TCA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TLSCA_PADDR=membersrvc:7054
+    expose:
+      - "7050"  # Rest
+      - "7051"  # Grpc
+      - "7052"  # Peer CLI
+      - "7053"  # Peer Event
+      - "7054"  # eCAP
+      - "7055"  # eCAA
+      - "7056"  # tCAP
+      - "7057"  # eCAA
+      - "7058"  # tlsCAP
+      - "7059"  # tlsCAA
+    links:
+      - vp0
+      - membersrvc
+    command: sh -c "sleep 10; peer node start"
+
+  vp2:
+    image: hyperledger/fabric-peer:latest
+    hostname: vp2
+    environment:
+      - CORE_PEER_ID=vp2
+      - CORE_PEER_DISCOVERY_ROOTNODE=vp0:7051
+      - CORE_SECURITY_ENROLLID=test_vp2
+      - CORE_SECURITY_ENROLLSECRET=vQelbRvja7cJ
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_NETWORKID=dev
+      - CORE_LOGGING_LEVEL=debug  #critical, error, warning, notice, info, debug
+      - CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=pbft  # noops, pbft
+      - CORE_PBFT_GENERAL_MODE=batch
+      - CORE_PBFT_GENERAL_N=4
+      - CORE_PBFT_GENERAL_BATCHSIZE=2
+      - CORE_PBFT_GENERAL_TIMEOUT_REQUEST=2s
+      - CORE_SECURITY_ENABLED=true
+      - CORE_PEER_PKI_ECA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TCA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TLSCA_PADDR=membersrvc:7054
+    expose:
+      - "7050"  # Rest
+      - "7051"  # Grpc
+      - "7052"  # Peer CLI
+      - "7053"  # Peer Event
+      - "7054"  # eCAP
+      - "7055"  # eCAA
+      - "7056"  # tCAP
+      - "7057"  # eCAA
+      - "7058"  # tlsCAP
+      - "7059"  # tlsCAA
+    links:
+      - vp0
+      - membersrvc
+    command: sh -c "sleep 10; peer node start"
+  vp3:
+    image: hyperledger/fabric-peer:latest
+    hostname: vp3
+    environment:
+      - CORE_PEER_ID=vp3
+      - CORE_PEER_DISCOVERY_ROOTNODE=vp0:7051
+      - CORE_SECURITY_ENROLLID=test_vp3
+      - CORE_SECURITY_ENROLLSECRET=9LKqKH5peurL
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_NETWORKID=dev
+      - CORE_LOGGING_LEVEL=debug  #critical, error, warning, notice, info, debug
+      - CORE_PEER_VALIDATOR_CONSENSUS_PLUGIN=pbft  # noops, pbft
+      - CORE_PBFT_GENERAL_MODE=batch
+      - CORE_PBFT_GENERAL_N=4
+      - CORE_PBFT_GENERAL_BATCHSIZE=2
+      - CORE_PBFT_GENERAL_TIMEOUT_REQUEST=2s
+      - CORE_SECURITY_ENABLED=true
+      - CORE_PEER_PKI_ECA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TCA_PADDR=membersrvc:7054
+      - CORE_PEER_PKI_TLSCA_PADDR=membersrvc:7054
+    expose:
+      - "7050"  # Rest
+      - "7051"  # Grpc
+      - "7052"  # Peer CLI
+      - "7053"  # Peer Event
+      - "7054"  # eCAP
+      - "7055"  # eCAA
+      - "7056"  # tCAP
+      - "7057"  # eCAA
+      - "7058"  # tlsCAP
+      - "7059"  # tlsCAA
+    links:
+      - vp0
+      - membersrvc
+    command: sh -c "sleep 10; peer node start"
